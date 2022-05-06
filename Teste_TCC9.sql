@@ -1,0 +1,61 @@
+
+EXEC sp_dropserver EXCELLINK;
+
+--CRIA UM LINKED SERVER COM O EXCEL
+	DECLARE @RC int
+
+	DECLARE @server     nvarchar(128)
+	DECLARE @srvproduct nvarchar(128)
+	DECLARE @provider   nvarchar(128)
+	DECLARE @datasrc    nvarchar(4000)
+	DECLARE @location   nvarchar(4000)
+	DECLARE @provstr    nvarchar(4000)
+	DECLARE @catalog    nvarchar(128)
+
+	-- Set parameter values
+	SET @server =     'EXCELLINK'
+	SET @srvproduct = 'Excel'
+	SET @provider =   'Microsoft.ACE.OLEDB.12.0'
+	SET @datasrc =    'C:\Users\Willa\OneDrive\Área de Trabalho\Files_Received\Viagem 1.xls'
+	SET @provstr =    'Excel 12.0'
+
+
+
+	EXEC @RC = [master].[dbo].[sp_addlinkedserver] @server, @srvproduct, @provider,
+	@datasrc, @location, @provstr, @catalog
+---FIM
+
+	EXEC sp_linkedservers;
+
+---INSERIR DADOS NA PLANILHA MED_PUP
+INSERT INTO MED_PUP (FK_ID_VIAGEM, MED_DATE, MED_TIME, AM1, AM2, AM3, AM4, AM5, MEDIA) SELECT * 
+FROM EXCELLINK...[Pup$];
+
+---INSERIR DADOS NA PLANILHA MED_HEART
+INSERT INTO MED_HEART (FK_ID_VIAGEM, MED_DATE, MED_TIME, AM1, AM2, AM3, AM4, AM5, MEDIA) SELECT * 
+FROM EXCELLINK...[Heart$];
+
+---INSERE AS MÉDIAS DOS VALORES OBTIDOS
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(10) WHERE ID_MED = 10;
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(2) WHERE ID_MED = 2;
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(3) WHERE ID_MED = 3;
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(4) WHERE ID_MED = 4;
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(5) WHERE ID_MED = 5;
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(6) WHERE ID_MED = 6;
+UPDATE MED_PUP SET MEDIA = dbo.VLR_MEDIOP(6) WHERE ID_MED = 7;
+
+UPDATE MED_HEART SET MEDIA = dbo.VLR_MEDIOH(1) WHERE MEDIA = NULL;
+UPDATE MED_HEART SET MEDIA = dbo.VLR_MEDIOH(2) WHERE ID_MED = 2;
+UPDATE MED_HEART SET MEDIA = dbo.VLR_MEDIOH(3) WHERE ID_MED = 3;
+UPDATE MED_HEART SET MEDIA = dbo.VLR_MEDIOH(4) WHERE ID_MED = 4;
+UPDATE MED_HEART SET MEDIA = dbo.VLR_MEDIOH(5) WHERE ID_MED = 5;
+UPDATE MED_HEART SET MEDIA = dbo.VLR_MEDIOH(6) WHERE ID_MED = 6;
+
+USE MyCompany;
+select * from FUNCIONÁRIOS;
+select * from VIAGENS;
+SELECT * FROM MED_PUP;
+SELECT * FROM MED_HEART;
+
+SELECT COUNT(MEDIA) FROM MED_PUP;
+SELECT COUNT(*) FROM MED_PUP;
